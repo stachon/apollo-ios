@@ -198,8 +198,10 @@ public class HTTPNetworkTransport {
         guard let body = try self.serializationFormat.deserialize(data: data) as? JSONObject else {
           throw GraphQLHTTPResponseError(body: data, response: httpResponse, kind: .invalidResponse)
         }
-        
-        let graphQLResponse = GraphQLResponse(operation: operation, body: body)
+
+        let headers = httpResponse.allHeaderFields
+
+        let graphQLResponse = GraphQLResponse(operation: operation, body: body, headers: headers)
         
         if let errors = graphQLResponse.parseErrorsOnlyFast() {
           // Handle specific errors from response
@@ -207,6 +209,7 @@ public class HTTPNetworkTransport {
                                            files: files,
                                            for: request,
                                            body: body,
+                                           headers: headers,
                                            errors: errors,
                                            completionHandler: completionHandler)
         } else {
@@ -261,6 +264,7 @@ public class HTTPNetworkTransport {
                                                       files: [GraphQLFile]?,
                                                       for request: URLRequest,
                                                       body: JSONObject,
+                                                      headers: [AnyHashable: Any],
                                                       errors: [GraphQLError],
                                                       completionHandler: @escaping (_ results: Result<GraphQLResponse<Operation>, Error>) -> Void) {
 
@@ -274,7 +278,7 @@ public class HTTPNetworkTransport {
                     completionHandler: completionHandler)
     } else {
       // Pass the response on to the rest of the chain
-      let response = GraphQLResponse(operation: operation, body: body)
+      let response = GraphQLResponse(operation: operation, body: body, headers: headers)
       handleGraphQLErrorsOrComplete(operation: operation, files: files, response: response, completionHandler: completionHandler)
     }
   }
