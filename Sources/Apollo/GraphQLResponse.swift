@@ -2,12 +2,10 @@
 public final class GraphQLResponse<Operation: GraphQLOperation> {
   public let operation: Operation
   public let body: JSONObject
-  public let headers: [AnyHashable: Any]
 
-  public init(operation: Operation, body: JSONObject, headers: [AnyHashable: Any]) {
+  public init(operation: Operation, body: JSONObject) {
     self.operation = operation
     self.body = body
-    self.headers = headers
   }
   
   func parseResult(cacheKeyForObject: CacheKeyForObject? = nil) throws -> Promise<(GraphQLResult<Operation.Data>, RecordSet?)>  {
